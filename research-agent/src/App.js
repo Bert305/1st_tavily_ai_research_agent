@@ -1,22 +1,57 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
   const [question, setQuestion] = useState("");
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [searchHistory, setSearchHistory] = useState([]);
 
-  const askResearchAgent = async () => {
-    if (!question.trim()) return;
+  // Load search history from localStorage on component mount
+  useEffect(() => {
+    const savedHistory = localStorage.getItem("searchHistory");
+    if (savedHistory) {
+      setSearchHistory(JSON.parse(savedHistory));
+    }
+  }, []);
+
+  // Save search history to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("searchHistory", JSON.stringify(searchHistory));
+  }, [searchHistory]);
+
+  const addToHistory = (query) => {
+    if (!query.trim()) return;
+    
+    // Remove duplicate if exists and add to front
+    const updatedHistory = [
+      query,
+      ...searchHistory.filter(item => item !== query)
+    ].slice(0, 10); // Keep only last 10 searches
+    
+    setSearchHistory(updatedHistory);
+  };
+
+  const askResearchAgent = async (queryToUse = null) => {
+    const searchQuery = queryToUse || question;
+    if (!searchQuery.trim()) return;
     
     setLoading(true);
     setResponse(null);
+    
+    // If using a query from history, update the input field
+    if (queryToUse) {
+      setQuestion(queryToUse);
+    }
+    
+    // Add to search history
+    addToHistory(searchQuery);
     
     try {
       const res = await fetch("http://localhost:5000/api/research", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question })
+        body: JSON.stringify({ question: searchQuery })
       });
 
       const data = await res.json();
@@ -32,6 +67,11 @@ function App() {
     if (e.key === 'Enter' && !loading) {
       askResearchAgent();
     }
+  };
+
+  const clearHistory = () => {
+    setSearchHistory([]);
+    localStorage.removeItem("searchHistory");
   };
 
   return (
@@ -55,7 +95,7 @@ function App() {
             />
             <button 
               className={`search-button ${loading ? 'loading' : ''}`}
-              onClick={askResearchAgent}
+              onClick={() => askResearchAgent()}
               disabled={loading || !question.trim()}
             >
               {loading ? (
@@ -66,6 +106,31 @@ function App() {
             </button>
           </div>
         </div>
+
+        {/* Search History Section */}
+        {searchHistory.length > 0 && (
+          <div className="history-section">
+            <div className="history-header">
+              <h3 className="history-title">🕒 Recent Searches</h3>
+              <button className="clear-history-btn" onClick={clearHistory}>
+                Clear All
+              </button>
+            </div>
+            <div className="history-items">
+              {searchHistory.map((historyItem, idx) => (
+                <button
+                  key={idx}
+                  className="history-item"
+                  onClick={() => askResearchAgent(historyItem)}
+                  disabled={loading}
+                >
+                  <span className="history-icon">🔍</span>
+                  <span className="history-text">{historyItem}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {response && (
           <div className="results-section">
