@@ -155,6 +155,53 @@ docker-compose up --build -d
 docker-compose logs -f
 ```
 
+### 🐳 Container Management
+
+Essential Docker commands for managing your AI Research Agent:
+
+| Command | Description |
+|---------|-------------|
+| `docker-compose down` | **Stop** the app from running using Docker |
+| `docker-compose up -d` | **Start** the application using Docker - both frontend & backend |
+| `docker-compose build --no-cache` | **Rebuild** Docker image once you make updates to the code |
+| `docker-compose logs -f` | **View** your Docker logs in real-time |
+
+**Quick Command Examples:**
+
+```bash
+# Stop the application
+docker-compose down
+
+# Start the application in detached mode (runs in background)
+docker-compose up -d
+
+# Rebuild after making code changes (recommended)
+docker-compose build --no-cache
+docker-compose up -d
+
+# View logs from all services
+docker-compose logs -f
+
+# View logs from specific service
+docker-compose logs -f frontend
+docker-compose logs -f backend
+```
+
+**Complete Workflow:**
+```bash
+# 1. Stop any running containers
+docker-compose down
+
+# 2. Rebuild with your latest changes
+docker-compose build --no-cache
+
+# 3. Start in background
+docker-compose up -d
+
+# 4. Monitor logs
+docker-compose logs -f
+```
+
 ## 📁 Project Structure
 
 ```
