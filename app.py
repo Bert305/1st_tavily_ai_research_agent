@@ -12,6 +12,11 @@ CORS(app)
 
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
+@app.route("/health", methods=["GET"])
+def health_check():
+    """Health check endpoint for Docker"""
+    return jsonify({"status": "healthy", "service": "AI Research Agent Backend"}), 200
+
 @app.route("/api/research", methods=["POST"])
 def research():
     data = request.get_json()
@@ -48,4 +53,4 @@ def research():
     })
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

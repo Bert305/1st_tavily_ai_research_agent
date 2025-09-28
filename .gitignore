@@ -78,3 +78,11 @@ coverage/
 # Temporary folders
 tmp/
 temp/
+
+# Docker
+.docker/
+docker-compose.override.yml
+.dockerignore
+
+# Container volumes
+backend_data/

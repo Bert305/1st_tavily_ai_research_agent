@@ -1,0 +1,59 @@
+# Build stage
+FROM node:18-alpine AS build
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files first for better caching
+COPY package*.json ./
+
+# Install ALL dependencies (including dev dependencies needed for build)
+RUN npm ci --include=dev
+
+# Copy source code
+COPY . .
+
+# Set environment variables for React build
+ENV NODE_ENV=production
+ENV GENERATE_SOURCEMAP=false
+ENV REACT_APP_API_URL=http://localhost:5000
+
+# Build the application with verbose output
+RUN npm run build
+
+# Debug: Verify build was successful
+RUN echo "=== Build completed, checking build directory ===" && \
+    ls -la build/ && \
+    echo "=== Static directory contents ===" && \
+    ls -la build/static/ || echo "No static directory found in build" && \
+    echo "=== Build manifest ===" && \
+    cat build/asset-manifest.json || echo "No manifest found"
+
+# Production stage
+FROM nginx:alpine
+
+# Remove default nginx website
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy built app to nginx directory (ensure all files are copied)
+COPY --from=build /app/build/ /usr/share/nginx/html/
+
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Fix permissions
+RUN chmod -R 755 /usr/share/nginx/html/
+
+# Debug: Verify all files were copied correctly
+RUN echo "=== Final nginx html directory ===" && \
+    ls -la /usr/share/nginx/html/ && \
+    echo "=== Static files ===" && \
+    find /usr/share/nginx/html/static -type f | head -10 || echo "No static files found" && \
+    echo "=== Index.html check ===" && \
+    test -f /usr/share/nginx/html/index.html && echo "index.html exists" || echo "index.html missing"
+
+# Expose port
+EXPOSE 80
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

@@ -81,6 +81,80 @@ npm start
 
 Visit `http://localhost:3000` to use the application! 🎉
 
+## 🐳 Docker Setup (Recommended)
+
+The easiest way to run the entire application is using Docker. This method runs both backend and frontend together with a single command.
+
+### Prerequisites for Docker
+- Docker Desktop installed
+- Tavily API Key ([Get one here](https://tavily.com))
+
+### Quick Start with Docker
+
+1. **Clone and Navigate:**
+```bash
+git clone https://github.com/Bert305/1st_tavily_ai_research_agent.git
+cd 1st_tavily_ai_research_agent
+```
+
+2. **Configure Environment:**
+```bash
+echo "TAVILY_API_KEY=your_tavily_api_key_here" > .env
+# Replace 'your_tavily_api_key_here' with your actual Tavily API key
+```
+
+3. **Start Application:**
+
+**Windows:**
+```cmd
+# Easy start (recommended)
+docker-start.bat
+
+# Or manually
+docker-compose up --build
+```
+
+**Linux/Mac:**
+```bash
+docker-compose up --build
+```
+
+4. **Access Your Application:**
+- 🌐 **Frontend**: http://localhost:3000
+- 🔧 **Backend API**: http://localhost:5000
+- 💚 **Health Check**: http://localhost:5000/health
+
+### Docker Management
+
+**Stop Application:**
+```bash
+# Windows
+docker-stop.bat
+
+# Linux/Mac
+docker-compose down
+```
+
+**View Logs:**
+```bash
+# All services
+docker-compose logs -f
+
+# Specific service
+docker-compose logs -f backend
+docker-compose logs -f frontend
+```
+
+**Development Mode:**
+```bash
+# Windows (with live logs)
+docker-dev.bat
+
+# Linux/Mac
+docker-compose up --build -d
+docker-compose logs -f
+```
+
 ## 📁 Project Structure
 
 ```
@@ -88,8 +162,15 @@ Visit `http://localhost:3000` to use the application! 🎉
 ├── app.py                      # Flask backend server
 ├── requirements.txt            # Python dependencies
 ├── .env                       # Environment variables (API keys)
+├── Dockerfile.backend         # Docker config for Flask backend
+├── docker-compose.yml         # Docker orchestration config
+├── docker-start.bat           # Windows Docker start script
+├── docker-stop.bat            # Windows Docker stop script
+├── docker-dev.bat             # Windows Docker dev script
 ├── README.md                  # Project documentation
 └── research-agent/            # React frontend
+    ├── Dockerfile.frontend   # Docker config for React frontend
+    ├── nginx.conf            # Nginx configuration
     ├── src/
     │   ├── App.js            # Main React component
     │   ├── App.css           # Modern UI styling
